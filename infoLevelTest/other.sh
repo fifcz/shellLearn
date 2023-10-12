@@ -15,6 +15,7 @@ function makeResultFile() {
       mkdir "$directory/$ip"
       touch "$directory/$ip/$ip.txt"
     resultFile="$directory/$ip/$ip.txt"
+    echo "ip = $ip，整改内容如下:">>$resultFile
   fi
 }
 
@@ -222,6 +223,7 @@ function modify_login_defs() {
 }
 function checkResult() {
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>身份鉴别安全<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    echo "1.身份鉴别 口令复杂度要求">>$resultFile
     grep -i "^password.*requisite.*pam_cracklib.so" /etc/pam.d/system-auth>>$resultFile
     if [ $? == 0 ];then
         echo ">>>密码复杂度:已设置"
@@ -234,8 +236,10 @@ function checkResult() {
         fi
     fi
     #echo "=============================dividing line================================"
+    more /etc/login.defs | grep -E "PASS_MAX_DAYS">>$resultFile
     more /etc/login.defs | grep -E "PASS_MAX_DAYS" | grep -v "#" |awk -F' '  '{if($2!=90){print ">>>密码过期天数是"$2"天,请管理员改成90天------[需调整]"}}'
     #echo "=============================dividing line================================"
+    echo "2.身份鉴别 登录失败策略"
     grep -i "^auth.*required.*pam_tally2.so.*$" /etc/pam.d/sshd>>$resultFile
     if [ $? == 0 ];then
       echo ">>>登入失败处理:已开启"
