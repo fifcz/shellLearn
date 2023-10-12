@@ -254,9 +254,9 @@ function checkResult() {
     fi
     echo "8.入侵防范 postfix服务状态">>$resultFile
     systemctl --type service | grep postfix>>$resultFile
-    echo "12.数据备份恢复"
+    echo "12.数据备份恢复">>$resultFile
     echo "备份路径为/data/backup/">>$resultFile
-    ll /data/backup/>>$resultFile
+    ls /data/backup/>>$resultFile
 }
 function  main() {
     checkNas
