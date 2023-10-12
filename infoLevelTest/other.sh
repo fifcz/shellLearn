@@ -236,10 +236,11 @@ function checkResult() {
         fi
     fi
     #echo "=============================dividing line================================"
+    echo "1.身份鉴别 口令过期天数">>$resultFile
     more /etc/login.defs | grep -E "PASS_MAX_DAYS">>$resultFile
     more /etc/login.defs | grep -E "PASS_MAX_DAYS" | grep -v "#" |awk -F' '  '{if($2!=90){print ">>>密码过期天数是"$2"天,请管理员改成90天------[需调整]"}}'
     #echo "=============================dividing line================================"
-    echo "2.身份鉴别 登录失败策略"
+    echo "2.身份鉴别 登录失败策略">>$resultFile
     grep -i "^auth.*required.*pam_tally2.so.*$" /etc/pam.d/sshd>>$resultFile
     if [ $? == 0 ];then
       echo ">>>登入失败处理:已开启"
