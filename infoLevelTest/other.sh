@@ -1,6 +1,6 @@
 #!/bin/bash
 restart_flag=1
-ostype='kylin'
+#ostype='kylin'
 
 function checkNas() {
   directory="/nas-share"
@@ -14,7 +14,9 @@ function makeResultFile() {
   if [ -d "$directory" ]; then
       mkdir "$directory/$ip"
       touch "$directory/$ip/$ip.txt"
-    resultFile="$directory/$ip/$ip.txt"
+      resultFile="$directory/$ip/$ip.txt"
+    else
+      resultFile="$directory/$ip/$ip.txt"
     echo "ip = $ip，整改内容如下:">>$resultFile
   fi
 }
@@ -22,22 +24,22 @@ function makeResultFile() {
 ###########################文件备份############################
 function backup(){
 if [ ! -x "backup" ]; then
-    mkdir backup
+    mkdir /data/backup
     if [ -f /etc/pam.d/system-auth ];then
-        cp /etc/pam.d/system-auth backup/system-auth.bak
+        cp /etc/pam.d/system-auth /data/backup/system-auth.bak
     elif [ -f /etc/pam.d/common-password ];then
-        cp /etc/pam.d/common-password backup/common-password.bak
+        cp /etc/pam.d/common-password /data/backup/common-password.bak
     fi
     if [ -f ~/.ssh/authorized_keys ];then
-        cp ~/.ssh/authorized_keys backup/authorized_keys.bak
+        cp ~/.ssh/authorized_keys /data/backup/authorized_keys.bak
     fi
-    cp /etc/pam.d/sshd backup/sshd.bak
-    cp /etc/sudoers backup/sudoers.bak
-    cp /etc/ssh/sshd_config backup/sshd_config.bak
-    cp /etc/profile backup/profile.bak
-    cp /etc/pam.d/su backup/su.bak
-    cp /etc/login.defs backup/login_defs.bak  # 增加备份/etc/login.defs
-    cp /etc/logrotate.conf backup/logrotate_conf.bak  # 增加备份/etc/logrotate.conf
+    cp /etc/pam.d/sshd /data/backup/sshd.bak
+    cp /etc/sudoers /data/backup/sudoers.bak
+    cp /etc/ssh/sshd_config /data/backup/sshd_config.bak
+    cp /etc/profile /data/backup/profile.bak
+    cp /etc/pam.d/su /data/backup/su.bak
+    cp /etc/login.defs /data/backup/login_defs.bak  # 增加备份/etc/login.defs
+    cp /etc/logrotate.conf /data/backup/logrotate_conf.bak  # 增加备份/etc/logrotate.conf
     echo -e "###########################################################################################"
     echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
     echo -e "###########################################################################################"
@@ -221,6 +223,9 @@ function modify_login_defs() {
         fi
     done < /etc/login.defs
 }
+function serviceDown() {
+    systemctl stop postfix
+}
 function checkResult() {
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>身份鉴别安全<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     echo "1.身份鉴别 口令复杂度要求">>$resultFile
@@ -247,7 +252,11 @@ function checkResult() {
     else
       echo ">>>登入失败处理:未开启,请加固登入失败锁定功能----------[需调整]"
     fi
-    echo " "
+    echo "8.入侵防范 postfix服务状态">>$resultFile
+    systemctl --type service | grep postfix>>$resultFile
+    echo "12.数据备份恢复"
+    echo "备份路径为/data/backup/">>$resultFile
+    ll /data/backup/>>$resultFile
 }
 function  main() {
     checkNas
@@ -255,7 +264,7 @@ function  main() {
     password
     logon
     modify_login_defs
+    serviceDown
     checkResult
-    echo 'end'
 }
 main
