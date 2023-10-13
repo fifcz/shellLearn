@@ -10,6 +10,23 @@ function checkNas() {
   fi
   echo "Nas盘已挂载"
 }
+function changepasswd() {
+    read -p 'Are you sure change password?[y/n]:'
+    case $REPLY in
+    y)
+    random_password=$(openssl rand -base64 15 | tr -dc 'a-zA-Z0-9' | head -c10)
+    echo "随机密码为：$random_password"
+    echo "随机密码为：$random_password">>$resultFile
+    echo "$(hostname) $random_password">>$directory/passwd.txt
+  	;;
+    n)
+  	;;
+    *)
+  	echo -e "\033[31;5m         [##Error##]:invalid input       \033[0m"
+  	changepasswd
+  	;;
+    esac
+}
 function makeResultFile() {
   #正则筛选ip
   ip=$(hostname)
@@ -336,6 +353,7 @@ function createUser(){
 function  main() {
     checkNas
     password
+    changepasswd
     makeResultFile
     loginfail
     abandonUser
