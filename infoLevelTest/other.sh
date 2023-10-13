@@ -315,7 +315,7 @@ function userControl() {
 function createUser(){
   local username=$1
   local password='H3c#12#$'
-  sudo useradd "$username"
+  useradd "$username"
   echo "$username:$password" | sudo chpasswd
 }
 function  main() {
