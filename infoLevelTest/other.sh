@@ -42,7 +42,7 @@ if [ ! -x "backup" ]; then
     if [ ! -d /nas-share/infolevel/$(hostname) ];then
       mkdir /nas-share/infolevel/$(hostname)
     fi
-    cp backup/ /$directory/$(hostname)
+    cp backup/ /$directory/$(hostname)/
     echo -e "###########################################################################################"
     echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
     echo -e "###########################################################################################"
@@ -230,8 +230,11 @@ function serviceDown() {
     systemctl stop postfix
 }
 function checkResult() {
+    echo "等保整改报告">>$resultFile
+    echo "报告时间">>$resultFile
+    date>>$resultFile
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>身份鉴别安全<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-    echo "1.身份鉴别 口令复杂度要求">>$resultFile
+    echo "1.身份鉴别-口令复杂度要求">>$resultFile
     grep -i "^password.*requisite.*pam_cracklib.so" /etc/pam.d/system-auth>>$resultFile
     if [ $? == 0 ];then
         echo ">>>密码复杂度:已设置"
@@ -244,40 +247,75 @@ function checkResult() {
         fi
     fi
     #echo "=============================dividing line================================"
-    echo "1.身份鉴别 口令过期天数">>$resultFile
+    echo "1.身份鉴别-口令过期天数">>$resultFile
     more /etc/login.defs | grep -E "PASS_MAX_DAYS">>$resultFile
     more /etc/login.defs | grep -E "PASS_MAX_DAYS" | grep -v "#" |awk -F' '  '{if($2!=90){print ">>>密码过期天数是"$2"天,请管理员改成90天------[需调整]"}}'
     #echo "=============================dividing line================================"
-    echo "2.身份鉴别 登录失败策略">>$resultFile
+    echo "2.身份鉴别-登录失败策略">>$resultFile
     grep -i "^auth.*required.*pam_tally2.so.*$" /etc/pam.d/sshd>>$resultFile
     if [ $? == 0 ];then
       echo ">>>登入失败处理:已开启"
     else
       echo ">>>登入失败处理:未开启,请加固登入失败锁定功能----------[需调整]"
     fi
-    echo "8.入侵防范 postfix服务状态">>$resultFile
+    echo "3.身份鉴别-未采用两种及两种以上身份鉴别技术的组合进行身份鉴别:无法整改">>$resultFile
+    echo "4.访问控制-未限制默认账户的远程访问:无法整改">>$resultFile
+    echo "5.访问控制-未删除或禁用用户名为“icinga”、“cloud-user”的多余账户"
+    echo "icinga用户已锁定，状态如下:">>$resultFile
+    cat /etc/shadow| grep icinga>>$resultFile
+    echo "cloud-user用户已锁定，状态如下:">>$resultFile
+    cat /etc/shadow| grep cloud-user>>$resultFile
+    echo "6.访问控制 未对管理的角色进行划分/管理用户未划分管理角色/未授予管理用户所需的最小权限，无法实现权限分离。"
+    echo "用户名\t\t用户组\t\t权限"
+    echo "----------------------------------------------"
+    while IFS=: read -r username _ uid gid _ home shell; do
+        group=$(grep ":$gid:" /etc/group | cut -d: -f1)
+        permissions=$(sudo -l -U "$username" 2>/dev/null | grep "(ALL) NOPASSWD:" | awk '{print $3}')
+        echo -e "$username\t\t$group\t\t$permissions">>$resultFile
+    done < /etc/passwd
+    echo "7.访问控制 未对重要主体和客体设置安全标记:无法整改"
+    echo "8.入侵防范-关闭无用服务：postfix服务状态">>$resultFile
     systemctl status  postfix | grep Active>>$resultFile
-    echo "12.数据备份恢复">>$resultFile
+    echo "9.恶意代码防范：@紫光云或微信提供"
+    echo "10.可信验证:无法整改">>$resultFile
+    echo "11.数据完整性：暂未申请服务">>$resultFile
+    echo "12.数据备份恢复：暂未申请服务，以下为手动备份">>$resultFile
     echo "备份路径为backup/">>$resultFile
     echo "备份文件如下："
     ls backup>>$resultFile
+    echo "13.数据备份恢复:异地机房 无法整改">>$resultFile
+    echo "14.数据备份恢复:热冗余部署 微信整理提供">>$resultFile
 }
 function abandonUser() {
   echo "禁用账户icinga,cloud-user:"
   #重启usermod -p password icinga
   usermod -L icinga
   usermod -L cloud-user
-  echo "icinga用户已锁定，状态如下:"
-  cat /etc/shadow| grep icinga>>$resultFile
-  echo "cloud-user用户已锁定，状态如下:"
-  cat /etc/shadow| grep cloud-user>>$resultFile
 
 }
 function userControl() {
   echo "访问控制-用户组及最小用户"
-  #sudo groupadd sysManager
-  #sudo groupadd secManager
-  #sudo groupadd auditManager
+  groupadd sysgroup
+  createUser sysadmin
+  usermod -G sysgroup sysadmin
+
+  groupadd secgroup
+  createUser secadmin
+  usermod -G secgroup secadmin
+  chown -R secadmin:secadmin /etc
+  chmod 700 /etc
+
+  groupadd auditgroup
+  createUser auditadmin
+  usermod -G auditgroup auditadmin
+  echo "auditadmin     ALL = (root) NOPASSWD: /usr/bin/cat, /usr/bin/less, /usr/bin/more, /usr/bin/tail, /usr/bin/head" | sudo tee -a /etc/sudoers
+  chown -R auditadmin:auditadmin /var/log
+  chmod 700 /var/log
+}
+function createUser(){
+  password='H3c#12#$'
+  sudo useradd "$username"
+  echo "$username:$password" | sudo chpasswd
 }
 function  main() {
     checkNas
@@ -287,6 +325,7 @@ function  main() {
     abandonUser
     modify_login_defs
     serviceDown
+    userControl
     checkResult
 }
 main
