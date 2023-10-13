@@ -249,13 +249,13 @@ function checkResult() {
     echo "1.身份鉴别-口令复杂度要求">>$resultFile
     grep -i "^password.*requisite.*pam_cracklib.so" /etc/pam.d/system-auth>>$resultFile
     if [ $? == 0 ];then
-        echo ">>>密码复杂度:已设置"
+        echo "密码复杂度:已设置">>$resultFile
     else
         grep -i "pam_pwquality\.so" /etc/pam.d/system-auth>>$resultFile
         if [ $? == 0 ];then
-    	echo ">>>密码复杂度:已设置"
+    	echo "密码复杂度:已设置">>$resultFile
         else
-    	echo ">>>密码复杂度:未设置,请加固密码--------[需调整]"
+    	echo "密码复杂度:未设置,请加固密码--------[需调整]"
         fi
     fi
     #echo "=============================dividing line================================"
@@ -266,9 +266,9 @@ function checkResult() {
     echo "2.身份鉴别-登录失败策略">>$resultFile
     grep -i "^auth.*required.*pam_tally2.so.*$" /etc/pam.d/sshd>>$resultFile
     if [ $? == 0 ];then
-      echo ">>>登入失败处理:已开启"
+      echo "登入失败处理:已开启">>$resultFile
     else
-      echo ">>>登入失败处理:未开启,请加固登入失败锁定功能----------[需调整]"
+      echo "登入失败处理:未开启,请加固登入失败锁定功能----------[需调整]"
     fi
     echo "3.身份鉴别-未采用两种及两种以上身份鉴别技术的组合进行身份鉴别:无法整改">>$resultFile
     echo "4.访问控制-未限制默认账户的远程访问:无法整改">>$resultFile
