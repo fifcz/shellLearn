@@ -11,6 +11,7 @@ function checkNas() {
   echo "Nas盘已挂载"
 }
 function makeResultFile() {
+  #正则筛选ip
   ip=$(hostname)
   if [ ! -d "$directory/$ip" ]; then
       mkdir "$directory/$ip"
@@ -24,7 +25,7 @@ function makeResultFile() {
 
 ###########################文件备份############################
 function backup(){
-if [ ! -x "backup" ]; then
+if [ ! -d "$directory/$ip/backup" ]; then
     mkdir backup
     if [ -f /etc/pam.d/system-auth ];then
         cp /etc/pam.d/system-auth backup/system-auth.bak
@@ -101,10 +102,10 @@ fi
         grep -i "pam_pwquality\.so" $config > /dev/null
         if [ $? == 0 ];then
             sed -i "s/password.*requisite.*pam_pwquality\.so.*$/password     requisite       pam_pwquality.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
-	    echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
+	    #echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
         else
             echo 'password      requisite       pam_cracklib.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1' >> $config
-	    echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
+	    #echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
         fi
     fi
 
