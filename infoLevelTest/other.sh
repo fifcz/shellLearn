@@ -16,19 +16,8 @@ function changepasswd() {
     y)
 
     # 生成满足复杂度要求的随机密码
-    length=12  # 密码长度
-    complexity=4  # 复杂度要求：大写字母、小写字母、数字、特殊字符
-
-    while true; do
-        random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
-
-        if [[ $(echo $random_password | grep -o [[:upper:]]) && \
-              $(echo $random_password | grep -o [[:lower:]]) && \
-              $(echo $random_password | grep -o [[:digit:]]) && \
-              $(echo $random_password | grep -o [!@#$%^&]) ]]; then
-            break
-        fi
-    done
+    #openssl生成失败
+    random_password=$(tr -dc 'A-Za-z0-9_!@#$%^&*()-+=' < /dev/urandom | head -c 10)
 
     echo "随机密码为：$random_password"
     echo "$(hostname) 随机密码为：$random_password">>$resultFile
