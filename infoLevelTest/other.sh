@@ -20,9 +20,9 @@ function changepasswd() {
     random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
 
     # 确保满足复杂度要求
-    while [[ ! $(echo $random_password | grep -o [[:upper:]]) || ! $(echo $random_password | grep -o [[:lower:]]) || ! $(echo $random_password | grep -o [[:digit:]]) || ! $(echo $random_password | grep -o [!@#$%^&*]) ]]; do
-        random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
-    done
+    #while [[ ! $(echo $random_password | grep -o [[:upper:]]) || ! $(echo $random_password | grep -o [[:lower:]]) || ! $(echo $random_password | grep -o [[:digit:]]) || ! $(echo $random_password | grep -o [!@#$%^&*]) ]]; do
+        #random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
+    #done
 
     echo "随机密码为：$random_password"
     echo "$(hostname) 随机密码为：$random_password">>$resultFile
