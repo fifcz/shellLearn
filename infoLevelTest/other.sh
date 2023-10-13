@@ -3,7 +3,7 @@ restart_flag=1
 #ostype='kylin'
 
 function checkNas() {
-  directory="/nas-share"
+  directory="/nas-share/infolevel"
   if [ ! -d "$directory" ]; then
       echo "目录 $directory 不存在，脚本终止执行!"
       exit 1
@@ -11,14 +11,13 @@ function checkNas() {
 }
 function makeResultFile() {
   ip=$(hostname)
-  if [ -d "$directory" ]; then
+  if [ ! -d "$directory/$ip" ]; then
       mkdir "$directory/$ip"
+  fi
       touch "$directory/$ip/$ip.txt"
       resultFile="$directory/$ip/$ip.txt"
-    else
-      resultFile="$directory/$ip/$ip.txt"
     echo "ip = $ip，整改内容如下:">>$resultFile
-  fi
+
 }
 
 ###########################文件备份############################
@@ -40,6 +39,10 @@ if [ ! -x "backup" ]; then
     cp /etc/pam.d/su backup/su.bak
     cp /etc/login.defs backup/login_defs.bak  # 增加备份/etc/login.defs
     cp /etc/logrotate.conf backup/logrotate_conf.bak  # 增加备份/etc/logrotate.conf
+    if [ ! -d /nas-share/infolevel/$(hostname) ];then
+      mkdir /nas-share/infolevel/$(hostname)
+    fi
+    cp backup/ /$directory/$(hostname)
     echo -e "###########################################################################################"
     echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
     echo -e "###########################################################################################"
@@ -253,16 +256,35 @@ function checkResult() {
       echo ">>>登入失败处理:未开启,请加固登入失败锁定功能----------[需调整]"
     fi
     echo "8.入侵防范 postfix服务状态">>$resultFile
-    systemctl --type service | grep postfix>>$resultFile
+    systemctl status  postfix | grep Active>>$resultFile
     echo "12.数据备份恢复">>$resultFile
-    echo "备份路径为/backup/">>$resultFile
+    echo "备份路径为backup/">>$resultFile
+    echo "备份文件如下："
     ls backup>>$resultFile
+}
+function abandonUser() {
+  echo "禁用账户icinga,cloud-user:"
+  #重启usermod -p password icinga
+  usermod -L icinga
+  usermod -L cloud-user
+  echo "icinga用户已锁定，状态如下:"
+  cat /etc/shadow| grep icinga>>$resultFile
+  echo "cloud-user用户已锁定，状态如下:"
+  cat /etc/shadow| grep cloud-user>>$resultFile
+
+}
+function userControl() {
+  echo "访问控制-用户组及最小用户"
+  #sudo groupadd sysManager
+  #sudo groupadd secManager
+  #sudo groupadd auditManager
 }
 function  main() {
     checkNas
-    makeResultFile
     password
+    makeResultFile
     logon
+    abandonUser
     modify_login_defs
     serviceDown
     checkResult
