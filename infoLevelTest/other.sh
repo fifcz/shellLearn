@@ -244,7 +244,7 @@ function serviceDown() {
 }
 function checkResult() {
     echo "等保整改报告">>$resultFile
-    echo "报告时间">>$resultFile,date>>$resultFile
+    echo "报告时间 $(date)">>$resultFile,
     echo "1.身份鉴别-口令复杂度要求">>$resultFile
     grep -i "^password.*requisite.*pam_cracklib.so" /etc/pam.d/system-auth>>$resultFile
     if [ $? == 0 ];then
