@@ -14,10 +14,9 @@ function changepasswd() {
     read -p 'Are you sure change password?[y/n]:'
     case $REPLY in
     y)
-    length=10  # 密码长度
-    complexity=4  # 复杂度要求：大写字母、小写字母、数字、特殊字符
+
     # 生成随机密码
-    random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
+    random_password=$(openssl rand -base64 10)
 
     # 确保满足复杂度要求
     #while [[ ! $(echo $random_password | grep -o [[:upper:]]) || ! $(echo $random_password | grep -o [[:lower:]]) || ! $(echo $random_password | grep -o [[:digit:]]) || ! $(echo $random_password | grep -o [!@#$%^&*]) ]]; do
@@ -30,6 +29,12 @@ function changepasswd() {
 
     # 将密码应用于 root 用户
     echo "root:$random_password" | chpasswd
+
+    if [ $? == 0 ];then
+      echo "修改密码成功"
+    else
+      echo "修改密码失败"
+    fi
   	;;
     n)
   	;;
