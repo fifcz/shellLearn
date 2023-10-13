@@ -25,8 +25,10 @@ function makeResultFile() {
 
 ###########################文件备份############################
 function backup(){
-if [ ! -d "$directory/$ip/backup" ]; then
-    mkdir backup
+if [ ! -x "$directory/$ip/backup" ]; then
+    if [ ! -d backup ]; then
+        mkdir backup
+    fi
     if [ -f /etc/pam.d/system-auth ];then
         cp /etc/pam.d/system-auth backup/system-auth.bak
     elif [ -f /etc/pam.d/common-password ];then
