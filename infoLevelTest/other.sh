@@ -8,6 +8,7 @@ function checkNas() {
       echo "目录 $directory 不存在，脚本终止执行!"
       exit 1
   fi
+  echo "Nas盘已挂载"
 }
 function makeResultFile() {
   ip=$(hostname)
@@ -17,6 +18,7 @@ function makeResultFile() {
       touch "$directory/$ip/$ip.txt"
       resultFile="$directory/$ip/$ip.txt"
     echo "ip = $ip，整改内容如下:">>$resultFile
+    echo "整改报告输出"
 
 }
 
@@ -43,13 +45,14 @@ if [ ! -x "backup" ]; then
       mkdir /nas-share/infolevel/$(hostname)
     fi
     cp backup/ /$directory/$(hostname)/
-    echo -e "###########################################################################################"
-    echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
-    echo -e "###########################################################################################"
+    echo "备份成功"
+    #echo -e "###########################################################################################"
+    #echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
+    #echo -e "###########################################################################################"
 else
-    echo -e "###########################################################################################"
-    echo -e "\033[1;31mBackup file already exist, to avoid overwriting these files, backup will not perform again\033[0m "
-    echo -e "###########################################################################################"
+    #echo -e "###########################################################################################"
+    echo "备份失败"
+    #echo -e "###########################################################################################"
 fi
 }
 ###########################执行备份############################
@@ -77,9 +80,9 @@ fi
 }
 ###########################口令复杂度设置############################
 function password(){
-    echo "#########################################################################################"
-    echo -e "\033[1;31m	    set password complexity requirements	\033[0m"
-    echo "#########################################################################################"
+    #echo "#########################################################################################"
+    #echo -e "\033[1;31m	    set password complexity requirements	\033[0m"
+    #echo "#########################################################################################"
 
 if [ -f /etc/pam.d/system-auth ];then
     config="/etc/pam.d/system-auth"
@@ -93,7 +96,7 @@ fi
     grep -i "^password.*requisite.*pam_cracklib.so" $config  > /dev/null
     if [ $? == 0 ];then
         sed -i "s/^password.*requisite.*pam_cracklib\.so.*$/password    requisite       pam_cracklib.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
-	echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
+	#echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
     else
         grep -i "pam_pwquality\.so" $config > /dev/null
         if [ $? == 0 ];then
@@ -106,7 +109,7 @@ fi
     fi
 
     if [ $? == 0 ];then
-        echo -e "\033[37;5m	    [Password complexity set success]	\033[0m"
+        echo -e "密码复杂度设置成功"
     else
         echo -e "\033[31;5m	    [Password complexity set failed]	\033[0m"
 	exit 1
@@ -114,10 +117,10 @@ fi
 }
 #######################Logon failure handling################################
 function logon(){
-    echo "#########################################################################################"
-    echo -e "\033[1;31m	    set logon failure handling		\033[0m"
-    echo "#########################################################################################"
-logonconfig=/etc/pam.d/sshd
+    #echo "#########################################################################################"
+    #echo -e "\033[1;31m	    set logon failure handling		\033[0m"
+    #echo "#########################################################################################"
+    logonconfig=/etc/pam.d/sshd
     read -p 'Are you sure set logon failure handling?[y/n]:'
     case $REPLY in
     y)
@@ -149,6 +152,16 @@ logonconfig=/etc/pam.d/sshd
     esac
 }
 #######################修改系统/etc/login.defs文件中的设置密码长度和定期更换要求参数################################
+function loginfail() {
+  logonconfig=/etc/pam.d/sshd
+  grep -i "^auth.*required.*pam_tally2.so.*$" $logonconfig  > /dev/null
+  if [ $? == 0 ];then
+    sed -i "s/auth.*required.*pam_tally2.so.*$/auth required pam_tally2.so deny=3 unlock_time=300 even_deny_root root_unlock_time=300/g" $logonconfig > /dev/null
+  else
+    sed -i '/^#%PAM-1.0/a\auth required pam_tally2.so deny=3 unlock_time=300 even_deny_root root_unlock_time=300' $logonconfig > /dev/null
+  fi
+  echo "登录失败已处理"
+}
 function modify_login_defs() {
     #Set logging of successful logins to yes
     LOG_OK_LOGINS="yes"
@@ -231,9 +244,7 @@ function serviceDown() {
 }
 function checkResult() {
     echo "等保整改报告">>$resultFile
-    echo "报告时间">>$resultFile
-    date>>$resultFile
-    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>身份鉴别安全<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    echo "报告时间">>$resultFile,date>>$resultFile
     echo "1.身份鉴别-口令复杂度要求">>$resultFile
     grep -i "^password.*requisite.*pam_cracklib.so" /etc/pam.d/system-auth>>$resultFile
     if [ $? == 0 ];then
@@ -323,7 +334,7 @@ function  main() {
     checkNas
     password
     makeResultFile
-    logon
+    loginfail
     abandonUser
     modify_login_defs
     serviceDown
