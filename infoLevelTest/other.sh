@@ -14,6 +14,8 @@ function changepasswd() {
     read -p 'Are you sure change password?[y/n]:'
     case $REPLY in
     y)
+    length=10  # 密码长度
+    complexity=4  # 复杂度要求：大写字母、小写字母、数字、特殊字符
     # 生成随机密码
     random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
 
