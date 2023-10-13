@@ -25,7 +25,7 @@ function changepasswd() {
         if [[ $(echo $random_password | grep -o [[:upper:]]) && \
               $(echo $random_password | grep -o [[:lower:]]) && \
               $(echo $random_password | grep -o [[:digit:]]) && \
-              $(echo $random_password | grep -o [!@#$%^&*]) ]]; then
+              $(echo $random_password | grep -o [!@#$%^&]) ]]; then
             break
         fi
     done
