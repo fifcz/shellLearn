@@ -16,7 +16,7 @@ function changepasswd() {
     y)
 
     # 生成随机密码
-    random_password=$(openssl rand -base64 10)
+    random_password=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9!@#$%^&*')
 
     # 确保满足复杂度要求
     #while [[ ! $(echo $random_password | grep -o [[:upper:]]) || ! $(echo $random_password | grep -o [[:lower:]]) || ! $(echo $random_password | grep -o [[:digit:]]) || ! $(echo $random_password | grep -o [!@#$%^&*]) ]]; do
