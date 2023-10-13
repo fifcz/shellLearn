@@ -15,18 +15,24 @@ function changepasswd() {
     case $REPLY in
     y)
 
-    # 生成随机密码
-    random_password=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9!@#$%^&*')
+    # 生成满足复杂度要求的随机密码
+    length=12  # 密码长度
+    complexity=4  # 复杂度要求：大写字母、小写字母、数字、特殊字符
 
-    # 确保满足复杂度要求
-    #while [[ ! $(echo $random_password | grep -o [[:upper:]]) || ! $(echo $random_password | grep -o [[:lower:]]) || ! $(echo $random_password | grep -o [[:digit:]]) || ! $(echo $random_password | grep -o [!@#$%^&*]) ]]; do
-        #random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
-    #done
+    while true; do
+        random_password=$(openssl rand -base64 $length | tr -dc 'a-zA-Z0-9!@#$%^&*')
+
+        if [[ $(echo $random_password | grep -o [[:upper:]]) && \
+              $(echo $random_password | grep -o [[:lower:]]) && \
+              $(echo $random_password | grep -o [[:digit:]]) && \
+              $(echo $random_password | grep -o [!@#$%^&*]) ]]; then
+            break
+        fi
+    done
 
     echo "随机密码为：$random_password"
     echo "$(hostname) 随机密码为：$random_password">>$resultFile
     echo "$(hostname) $random_password">>$directory/passwd.txt
-
     # 将密码应用于 root 用户
     echo "root:$random_password" | chpasswd
 
