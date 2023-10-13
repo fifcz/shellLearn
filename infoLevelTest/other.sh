@@ -15,8 +15,9 @@ function changepasswd() {
     case $REPLY in
     y)
     random_password=$(openssl rand -base64 15 | tr -dc 'a-zA-Z0-9' | head -c10)
+    echo "root:$password" | chpasswd
     echo "随机密码为：$random_password"
-    echo "随机密码为：$random_password">>$resultFile
+    echo "$(hostname) 随机密码为：$random_password">>$resultFile
     echo "$(hostname) $random_password">>$directory/passwd.txt
   	;;
     n)
@@ -353,8 +354,8 @@ function createUser(){
 function  main() {
     checkNas
     password
-    changepasswd
     makeResultFile
+    changepasswd
     loginfail
     abandonUser
     modify_login_defs
