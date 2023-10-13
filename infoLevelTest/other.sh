@@ -260,23 +260,23 @@ function checkResult() {
     fi
     echo "3.身份鉴别-未采用两种及两种以上身份鉴别技术的组合进行身份鉴别:无法整改">>$resultFile
     echo "4.访问控制-未限制默认账户的远程访问:无法整改">>$resultFile
-    echo "5.访问控制-未删除或禁用用户名为“icinga”、“cloud-user”的多余账户"
+    echo "5.访问控制-未删除或禁用用户名为“icinga”、“cloud-user”的多余账户">>$resultFile
     echo "icinga用户已锁定，状态如下:">>$resultFile
     cat /etc/shadow| grep icinga>>$resultFile
     echo "cloud-user用户已锁定，状态如下:">>$resultFile
     cat /etc/shadow| grep cloud-user>>$resultFile
-    echo "6.访问控制 未对管理的角色进行划分/管理用户未划分管理角色/未授予管理用户所需的最小权限，无法实现权限分离。"
-    echo "用户名\t\t用户组\t\t权限"
+    echo "6.访问控制 未对管理的角色进行划分/管理用户未划分管理角色/未授予管理用户所需的最小权限，无法实现权限分离。">>$resultFile
+    echo "用户名\t\t用户组\t\t权限">>$resultFile
     echo "----------------------------------------------"
     while IFS=: read -r username _ uid gid _ home shell; do
         group=$(grep ":$gid:" /etc/group | cut -d: -f1)
         permissions=$(sudo -l -U "$username" 2>/dev/null | grep "(ALL) NOPASSWD:" | awk '{print $3}')
         echo -e "$username\t\t$group\t\t$permissions">>$resultFile
     done < /etc/passwd
-    echo "7.访问控制 未对重要主体和客体设置安全标记:无法整改"
+    echo "7.访问控制 未对重要主体和客体设置安全标记:无法整改">>$resultFile
     echo "8.入侵防范-关闭无用服务：postfix服务状态">>$resultFile
     systemctl status  postfix | grep Active>>$resultFile
-    echo "9.恶意代码防范：@紫光云或微信提供"
+    echo "9.恶意代码防范：@紫光云或微信提供">>$resultFile
     echo "10.可信验证:无法整改">>$resultFile
     echo "11.数据完整性：暂未申请服务">>$resultFile
     echo "12.数据备份恢复：暂未申请服务，以下为手动备份">>$resultFile
@@ -313,7 +313,8 @@ function userControl() {
   chmod 700 /var/log
 }
 function createUser(){
-  password='H3c#12#$'
+  local username=$1
+  local password='H3c#12#$'
   sudo useradd "$username"
   echo "$username:$password" | sudo chpasswd
 }
