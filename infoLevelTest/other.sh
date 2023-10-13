@@ -281,7 +281,7 @@ function checkResult() {
     echo "11.数据完整性：暂未申请服务">>$resultFile
     echo "12.数据备份恢复：暂未申请服务，以下为手动备份">>$resultFile
     echo "备份路径为backup/">>$resultFile
-    echo "备份文件如下："
+    echo "备份文件如下：">>$resultFile
     ls backup>>$resultFile
     echo "13.数据备份恢复:异地机房 无法整改">>$resultFile
     echo "14.数据备份恢复:热冗余部署 微信整理提供">>$resultFile
@@ -304,19 +304,20 @@ function userControl() {
   usermod -G secgroup secadmin
   chown -R secadmin:secadmin /etc
   chmod 700 /etc
-
   groupadd auditgroup
   createUser auditadmin
   usermod -G auditgroup auditadmin
-  echo "auditadmin     ALL = (root) NOPASSWD: /usr/bin/cat, /usr/bin/less, /usr/bin/more, /usr/bin/tail, /usr/bin/head" | sudo tee -a /etc/sudoers
+  #echo "auditadmin     ALL = (root) NOPASSWD: /usr/bin/cat, /usr/bin/less, /usr/bin/more, /usr/bin/tail, /usr/bin/head" | tee -a /etc/sudoers
   chown -R auditadmin:auditadmin /var/log
   chmod 700 /var/log
 }
 function createUser(){
+
   local username=$1
   local password='H3c#12#$'
   useradd "$username"
-  echo "$username:$password" | sudo chpasswd
+  echo "$username:$password" | chpasswd
+  echo "用户已创建：'$1'"
 }
 function  main() {
     checkNas
