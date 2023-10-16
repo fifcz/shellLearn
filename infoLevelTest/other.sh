@@ -76,7 +76,7 @@ if [ ! -x "$directory/$ip/backup" ]; then
     if [ ! -d /nas-share/infolevel/$(hostname) ];then
       mkdir /nas-share/infolevel/$(hostname)
     fi
-    cp backup/ /$directory/$(hostname)/
+    cp -r backup/ /$directory/$(hostname)/
     echo "备份成功"
     #echo -e "###########################################################################################"
     #echo -e "\033[1;31m	    Auto backup successfully	    \033[0m"
@@ -127,15 +127,15 @@ fi
 
     grep -i "^password.*requisite.*pam_cracklib.so" $config  > /dev/null
     if [ $? == 0 ];then
-        sed -i "s/^password.*requisite.*pam_cracklib\.so.*$/password    requisite       pam_cracklib.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
+        sed -i "s/^password.*requisite.*pam_cracklib\.so.*$/password    requisite       pam_cracklib.so retry=3 difok=3 minlen=10 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
 	#echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
     else
         grep -i "pam_pwquality\.so" $config > /dev/null
         if [ $? == 0 ];then
-            sed -i "s/password.*requisite.*pam_pwquality\.so.*$/password     requisite       pam_pwquality.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
+            sed -i "s/password.*requisite.*pam_pwquality\.so.*$/password     requisite       pam_pwquality.so retry=3 difok=3 minlen=10 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1/g" $config
 	    #echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
         else
-            echo 'password      requisite       pam_cracklib.so retry=3 difok=3 minlen=12 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1' >> $config
+            echo 'password      requisite       pam_cracklib.so retry=3 difok=3 minlen=10 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1' >> $config
 	    #echo -e "\033[1;31m密码修改重试3次机会，新密码与老密码必须有3字符不同，最小密码长度12个字符，包含大写字符至少一个，小写字母至少一个，数字至少一个，特殊字符至少一个\033[0m"
         fi
     fi
