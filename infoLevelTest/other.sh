@@ -14,17 +14,16 @@ function changepasswd() {
     read -p 'Are you sure change password?[y/n]:'
     case $REPLY in
     y)
-
     # 生成满足复杂度要求的随机密码
     #openssl生成失败
-    random_password=$(tr -dc 'A-Za-z0-9_!@#$%^&*()-+=' < /dev/urandom | head -c 10)
+    #expect包mkpasswd
+    random_password=$(tr -dc 'A-Za-z0-9_!@#%^&*()-+=' < /dev/urandom | head -c 10)
 
     echo "随机密码为：$random_password"
-    echo "$(hostname) 随机密码为：$random_password">>$resultFile
-    echo "$(hostname) $random_password">>$directory/passwd.txt
+    echo "$(ip) 随机密码为：$random_password">>$resultFile
+    echo "$(ip) $random_password">>$directory/passwd.txt
     # 将密码应用于 root 用户
     echo "root:$random_password" | chpasswd
-
     if [ $? == 0 ];then
       echo "修改密码成功"
     else
@@ -34,14 +33,14 @@ function changepasswd() {
     n)
   	;;
     *)
-  	echo -e "\033[31;5m         [##Error##]:invalid input       \033[0m"
+  	echo -e "无效输入"
   	changepasswd
   	;;
     esac
 }
 function makeResultFile() {
   #正则筛选ip
-  ip=$(hostname)
+  ip=$(ifconfig | grep -A 1 "eth0" | grep "inet")
   if [ ! -d "$directory/$ip" ]; then
       mkdir "$directory/$ip"
   fi
