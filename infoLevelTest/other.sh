@@ -20,8 +20,8 @@ function changepasswd() {
     random_password=$(tr -dc 'A-Za-z0-9_!@#%^&*()-+=' < /dev/urandom | head -c 10)
 
     echo "随机密码为：$random_password"
-    echo "$(ip1) 随机密码为：$random_password">>$resultFile
-    echo "$(ip1) $random_password">>$directory/passwd.txt
+    echo "$ip1 随机密码为：$random_password">>$resultFile
+    echo "$ip1 $random_password">>$directory/passwd.txt
     # 将密码应用于 root 用户
     echo "root:$random_password" | chpasswd
     if [ $? == 0 ];then
