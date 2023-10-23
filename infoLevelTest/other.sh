@@ -40,7 +40,7 @@ function changepasswd() {
 }
 function makeResultFile() {
   #正则筛选ip
-  ip=$(ifconfig | grep -A 1 "eth0" | grep "inet")
+  ip=$(ifconfig eth0 | awk '/inet / {print $2}')
   if [ ! -d "$directory/$ip" ]; then
       mkdir "$directory/$ip"
   fi
