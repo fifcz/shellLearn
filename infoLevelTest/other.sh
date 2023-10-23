@@ -20,8 +20,8 @@ function changepasswd() {
     random_password=$(tr -dc 'A-Za-z0-9_!@#%^&*()-+=' < /dev/urandom | head -c 10)
 
     echo "随机密码为：$random_password"
-    echo "$(ip) 随机密码为：$random_password">>$resultFile
-    echo "$(ip) $random_password">>$directory/passwd.txt
+    echo "$(ip1) 随机密码为：$random_password">>$resultFile
+    echo "$(ip1) $random_password">>$directory/passwd.txt
     # 将密码应用于 root 用户
     echo "root:$random_password" | chpasswd
     if [ $? == 0 ];then
@@ -40,20 +40,20 @@ function changepasswd() {
 }
 function makeResultFile() {
   #正则筛选ip
-  ip=$(ifconfig eth0 | awk '/inet / {print $2}')
-  if [ ! -d "$directory/$ip" ]; then
-      mkdir "$directory/$ip"
+  ip1=$(ifconfig eth0 | awk '/inet / {print $2}')
+  if [ ! -d "$directory/$ip1" ]; then
+      mkdir "$directory/$ip1"
   fi
-      touch "$directory/$ip/$ip.txt"
-      resultFile="$directory/$ip/$ip.txt"
-    echo "ip = $ip，整改内容如下:">>$resultFile
+      touch "$directory/$ip1/$ip1.txt"
+      resultFile="$directory/$ip1/$ip1.txt"
+    echo "ip = $ip1，整改内容如下:">>$resultFile
     echo "整改报告输出"
 
 }
 
 ###########################文件备份############################
 function backup(){
-if [ ! -x "$directory/$ip/backup" ]; then
+if [ ! -x "$directory/$ip1/backup" ]; then
     if [ ! -d backup ]; then
         mkdir backup
     fi
